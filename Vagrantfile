@@ -26,7 +26,7 @@ NODE = { :nameprefix => "node-",  # nodes get names: node-1, node-2, etc.
               :ip_offset => 100,  # nodes get IP addresses: 192.168.1.101, .102, .103, etc
               :image => NODE_IMAGE}
 # Number of nodes to start:
-NODE_COUNT = 1
+NODE_COUNT = 3
 
 # Common configuration
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -43,7 +43,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".*/"
+  #config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".*/"
   config.ssh.insert_key = false
 
   # Definition of N nodes
@@ -53,7 +53,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Definition of NODE
     config.vm.define node_name do |s|
       s.vm.network "private_network", ip: node_ip_addr
-      s.vm.network "forwarded_port", guest: 5000, host: 8080 + i, host_ip: "0.0.0.0"
+      s.vm.network "forwarded_port", guest: 10000, host: 8080 + i, host_ip: "0.0.0.0"
       s.vm.hostname = node_name
       s.vm.provider "docker" do |d|
         d.build_dir = "node"

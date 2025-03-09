@@ -1,11 +1,27 @@
-from flask import Flask
+from api import Api
+from communication import Communication
+from threading import Thread
+import time
 
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return '<html><head><title>Hello World</title></head>' + \
-           '<body><h2>It works!</h2></body></html>\n'
+def send_data():
+    i = 0
+    while True:
+        print(f"sending: Hello World - {i}")
+        Communication.send(f"Hello World - {i}")
+        time.sleep(1)
+        i += 1
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+    flask_thread = Api()
+    send_thread = Thread(target=send_data)
+    listen_thread = Thread(target=Communication.listen)
+
+    flask_thread.start()
+    send_thread.start()
+    listen_thread.start()
+
+    flask_thread.join()
+    send_thread.join()
+    listen_thread.join()
+
+    print("Done")
