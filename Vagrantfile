@@ -26,7 +26,7 @@ NODE = { :nameprefix => "node-",  # nodes get names: node-1, node-2, etc.
               :ip_offset => 100,  # nodes get IP addresses: 192.168.1.101, .102, .103, etc
               :image => NODE_IMAGE}
 # Number of nodes to start:
-NODE_COUNT = 3
+NODE_COUNT = 5
 
 # Common configuration
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
