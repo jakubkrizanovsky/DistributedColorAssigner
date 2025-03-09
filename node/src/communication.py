@@ -1,5 +1,6 @@
 import socket
 import struct
+from typing import Callable
 
 MCAST_PORT:int = 8888
 MCAST_ADDR:str = "224.1.1.1"
@@ -7,11 +8,9 @@ MCAST_TTL = 2
 
 class Communication:
 
-    last_msg:str = ""
-    last_addr = None
     own_addr = socket.gethostbyname(socket.gethostname())
 
-    def listen():
+    def listen(callback:Callable[[str, str], None]):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((MCAST_ADDR, MCAST_PORT))
@@ -19,8 +18,7 @@ class Communication:
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
             data, addr = sock.recvfrom(1024)
-            Communication.last_msg = data.decode("utf-8")
-            Communication.last_addr = addr[0]
+            callback(addr[0], data.decode("utf-8"))
         
 
     def send(msg:str):
