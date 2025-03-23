@@ -38,8 +38,11 @@ class ColorAssigner(Thread):
         while True:
             target_distribution = self.get_target_distribution()
             actual_distribution = self.get_actual_distribution()
-            print(f"Is target distribution: {self.is_target_distribution(target_distribution, actual_distribution)}")
-            self.randomize_color()
+            is_target_distribution = self.is_target_distribution(target_distribution, actual_distribution)
+            print(f"Is target distribution: {is_target_distribution}")
+            if not is_target_distribution:
+                self.randomize_color()
+
             self.send_color()
 
 
@@ -79,7 +82,13 @@ class ColorAssigner(Thread):
         return actual_distribution
 
 
-    def is_target_distribution(self, target_distribution:Dict[str, int], actual_distribution:Dict[str, int]) -> bool:
+    def is_target_distribution(self, target_distribution:Dict[str, int] = None, actual_distribution:Dict[str, int] = None) -> bool:
+        if target_distribution is None:
+            target_distribution = self.get_target_distribution()
+
+        if actual_distribution is None:
+            actual_distribution = self.get_actual_distribution()
+
         for color, count in target_distribution.items():
             if(count != actual_distribution[color]):
                 return False

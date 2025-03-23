@@ -1,9 +1,11 @@
 COLOR_DITRIBUTION = {
-    "blue": 60,
-    "green": 40
+    "red": 20,
+    "green": 40,
+    "blue": 20,
+    "yellow": 20
 }
 
-FILL_COLOR = "green"
+FILL_COLOR = "red"
 
 MCAST_PORT:int = 8888
 MCAST_ADDR:str = "224.1.1.1"
