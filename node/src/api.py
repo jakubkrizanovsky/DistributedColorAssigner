@@ -2,8 +2,9 @@ from color_assigner import ColorAssigner
 from communication import Communication
 from flask import Flask
 from threading import Thread
+import os
 
-API_PORT:int = 10000
+API_DEFAULT_PORT:int = 8080
 
 app = Flask(__name__)
 
@@ -11,11 +12,21 @@ class Api(Thread):
 
     communication:Communication = None
     color_assigner:ColorAssigner = None
+    my_api_port:int = None
+    min_api_port:int = None
+    max_api_port:int = None
 
     def __init__(self, communication:Communication, color_assigner:ColorAssigner):
         super(Api, self).__init__()
         Api.communication = communication
         Api.color_assigner:ColorAssigner = color_assigner
+        try:
+            Api.my_api_port = int(os.getenv("MY_API_PORT"))
+            Api.min_api_port = int(os.getenv("MIN_API_PORT"))
+            Api.max_api_port = int(os.getenv("MAX_API_PORT"))
+        except:
+            print(f"Cannot read api ports from env variables, using default port {API_DEFAULT_PORT}")
+
 
     @app.route('/')
     def home():
@@ -41,8 +52,17 @@ class Api(Thread):
     
 
     def footer() -> str:
-        #TODO
-        return "<br><div><a href=\"http://localhost:8081\">prev</a> | <a href=\"http://localhost:8081\">next</a></div>"
+        if Api.my_api_port is None:
+            return ""
+        
+        prev_link = f"<a href=\"http://localhost:{Api.my_api_port - 1}\">prev</a>" \
+            if Api.my_api_port - 1 >= Api.min_api_port else "<span>first</span>"
+        
+        next_link = f"<a href=\"http://localhost:{Api.my_api_port + 1}\">next</a>" \
+            if Api.my_api_port + 1 <= Api.max_api_port else "<span>last</span>"
+
+        return f"<br><div>{prev_link} | {next_link}</div>"
 
     def run(self):
-        app.run(host="0.0.0.0", port=API_PORT)
+        api_port = Api.my_api_port if Api.my_api_port is not None else API_DEFAULT_PORT
+        app.run(host="0.0.0.0", port=api_port)

@@ -53,13 +53,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Definition of NODE
     config.vm.define node_name do |s|
       s.vm.network "private_network", ip: node_ip_addr
-      s.vm.network "forwarded_port", guest: 10000, host: 8080 + i, host_ip: "0.0.0.0"
+      s.vm.network "forwarded_port", guest: 8080 + i, host: 8080 + i, host_ip: "0.0.0.0"
       s.vm.hostname = node_name
       s.vm.provider "docker" do |d|
         d.build_dir = "node"
         d.build_args = ["-t", "#{NODE[:image]}"]
         d.name = node_name
         d.has_ssh = true
+        d.env = { "MIN_API_PORT" => 8081, "MAX_API_PORT" => 8080 + NODE_COUNT, "MY_API_PORT" => 8080 + i}
       end
       s.vm.post_up_message = "Node #{node_name} up and running. You can access the node with 'vagrant ssh #{node_name}'"
     end
