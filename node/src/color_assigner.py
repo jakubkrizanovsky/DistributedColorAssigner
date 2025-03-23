@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from config import *
@@ -8,13 +9,18 @@ from typing import Dict
 
 class ColorAssigner(Thread):
 
-    def __init__(self):
+    def __init__(self, communication:Communication):
         super(ColorAssigner, self).__init__()
+        self.communication = communication
 
         self.color:str = None
-        self.table:Dict[str, str] = {}
+        self.color_table:Dict[str, str] = {}
 
         self.randomize_color()
+
+    def set_color(self, color:str):
+        self.color = color
+        self.color_table[self.communication.own_addr + " (this node)"] = color
 
     def randomize_color(self):
         total = sum(COLOR_DITRIBUTION.values())
@@ -22,22 +28,27 @@ class ColorAssigner(Thread):
         for color, dist in COLOR_DITRIBUTION.items():
             value -= dist
             if value <= 0:
-                self.color = color
+                self.set_color(color)
                 return
 
-    def update(self, node, value):
-        print(f"Received: {value} from {node}")
-        self.table[node] = value
+    def update(self, node, msg):
+        if(msg["type"]) == "update":
+            self.color_table[node] = msg["value"]
 
     def send_color(self):
         while True:
             self.randomize_color()
-            print(f"Sending: {self.color}")
-            Communication.send(self.color)
+
+            msg = {
+                "type":"update",
+                "value":self.color
+            }
+
+            self.communication.send(msg)
             time.sleep(1)
     
     def run(self):
-        listen_thread = Thread(target=Communication.listen, args=[self.update])
+        listen_thread = Thread(target=self.communication.listen, args=[self.update])
         send_thread = Thread(target=self.send_color)
 
         listen_thread.start()

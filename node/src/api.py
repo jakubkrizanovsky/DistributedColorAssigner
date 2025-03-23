@@ -11,17 +11,19 @@ class Api(Thread):
 
     color_assigner:ColorAssigner = None
 
-    def __init__(self, color_assigner:ColorAssigner):
+    def __init__(self, communication:Communication, color_assigner:ColorAssigner):
         super(Api, self).__init__()
+        Api.communication = communication
         Api.color_assigner:ColorAssigner = color_assigner
 
     @app.route('/')
     def home():
         response:str =  "<html><head><title>DSA</title></head>\n" + \
             "<body>\n" + \
-                "<h2>Hello World</h2>\n"
+                "<h2>Hello World</h2>\n" + \
+                f"<h3>Node address: {Api.communication.own_addr}</h3>"
                 
-        for node, value in Api.color_assigner.table.items():
+        for node, value in Api.color_assigner.color_table.items():
             response += f"<p>{node}: {value}</p>"
 
         response += "</body></html>\n"
