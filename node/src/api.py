@@ -46,7 +46,7 @@ class Api(Thread):
 
     def get_color_table() -> str:
         html = ""
-        for node, value in Api.color_assigner.color_table.items():
+        for node, value in sorted(Api.color_assigner.color_table.items(), key=lambda item: item[0]):
             html += f"<div>{node}: <span style=\"color:{value}\">{value}</span></div>"
         return html
     
@@ -55,10 +55,10 @@ class Api(Thread):
         if Api.my_api_port is None:
             return ""
         
-        prev_link = f"<a href=\"http://localhost:{Api.my_api_port - 1}\">prev</a>" \
+        prev_link = f"<a href=\"http://localhost:{Api.my_api_port - 1}\">previous node</a>" \
             if Api.my_api_port - 1 >= Api.min_api_port else "<span>first</span>"
         
-        next_link = f"<a href=\"http://localhost:{Api.my_api_port + 1}\">next</a>" \
+        next_link = f"<a href=\"http://localhost:{Api.my_api_port + 1}\">next node</a>" \
             if Api.my_api_port + 1 <= Api.max_api_port else "<span>last</span>"
 
         return f"<br><div>{prev_link} | {next_link}</div>"

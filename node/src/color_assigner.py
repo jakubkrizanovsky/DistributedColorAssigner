@@ -41,7 +41,7 @@ class ColorAssigner(Thread):
             is_target_distribution = self.is_target_distribution(target_distribution, actual_distribution)
             print(f"Is target distribution: {is_target_distribution}")
             if not is_target_distribution:
-                self.randomize_color()
+                self.adjust_color(target_distribution, actual_distribution)
 
             self.send_color()
 
@@ -94,6 +94,32 @@ class ColorAssigner(Thread):
                 return False
             
         return True
+    
+    
+    def adjust_color(self, target_distribution:Dict[str, int], actual_distribution:Dict[str, int]):
+        change_probability = 1 - target_distribution[self.color] / actual_distribution[self.color]
+
+        if change_probability <= 0: 
+            # don't change color if actual count of nodes for this color is ok, or less than target
+            return
+        
+        if random.random() > change_probability:
+            # not randomly selected for color change
+            return
+        
+        color_diffs = {color : actual_distribution[color] - target_count for color, target_count in target_distribution.items()}
+        ideal_changes = sum(value for value in color_diffs.values() if value > 0)
+
+        # calculate probabilities to change to each color
+        color_probabilities = {color : -diff/ideal_changes for color, diff in color_diffs.items() if diff < 0}
+
+        # pick a color to change to based on probabilities
+        rng_value = random.random()
+        for color, probability in color_probabilities.items():
+            rng_value -= probability
+            if rng_value <= 0:
+                self.set_color(color)
+                return
 
 
     def update_table(self, node, msg):
