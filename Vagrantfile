@@ -62,7 +62,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         d.has_ssh = true
         d.env = { "MIN_API_PORT" => 8081, "MAX_API_PORT" => 8080 + NODE_COUNT, "MY_API_PORT" => 8080 + i}
       end
-      s.vm.post_up_message = "Node #{node_name} up and running. You can access the node with 'vagrant ssh #{node_name}'"
+      s.vm.post_up_message = "Node #{node_name} up and running. You can access the node with 'docker exec -it #{node_name} bash'"
     end
   end
 end

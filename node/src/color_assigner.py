@@ -1,9 +1,8 @@
-import json
 import random
 import time
 from config import *
 from communication import Communication
-from threading import Thread
+from threading import Thread, Lock
 from typing import Dict
 
 
@@ -14,12 +13,15 @@ class ColorAssigner(Thread):
         self.communication = communication
 
         self.color:str = None
+        self.mutex = Lock()
         self.color_table:Dict[str, str] = {}
+        self.last_seen_table:Dict[str, int] = {}
 
         self.randomize_color()
 
 
     def set_color(self, color:str):
+        print(f"changing color from {self.color} to {color}")
         self.color = color
         self.color_table[self.communication.own_addr + " (this node)"] = color
 
@@ -44,11 +46,14 @@ class ColorAssigner(Thread):
                 self.adjust_color(target_distribution, actual_distribution)
 
             self.send_color()
+            time.sleep(TIME_INTERVAL)
+            self.tick_last_seen()
 
 
     def get_target_distribution(self) -> Dict[str, int]:
         target_distribution: Dict[str, int] = {}
-        node_count = len(self.color_table)
+        with self.mutex:
+            node_count = len(self.color_table)
         total = sum(COLOR_DITRIBUTION.values())
         actual_sum = 0
         
@@ -60,10 +65,6 @@ class ColorAssigner(Thread):
         if actual_sum < node_count:
             target_distribution[FILL_COLOR] += node_count - actual_sum
 
-        print("Target distribution")
-        for color, value in target_distribution.items():
-            print(f"{color} : {value}")
-
         return target_distribution
     
     
@@ -72,12 +73,9 @@ class ColorAssigner(Thread):
         for color in COLOR_DITRIBUTION.keys():
             actual_distribution[color] = 0
 
-        for color in self.color_table.values():
-            actual_distribution[color] += 1
-
-        print("Actual distribution")
-        for color, value in actual_distribution.items():
-            print(f"{color} : {value}")
+        with self.mutex:
+            for color in self.color_table.values():
+                actual_distribution[color] += 1
 
         return actual_distribution
 
@@ -120,11 +118,28 @@ class ColorAssigner(Thread):
             if rng_value <= 0:
                 self.set_color(color)
                 return
+            
+    
+    def tick_last_seen(self):
+        nodes = list(self.last_seen_table.keys())
+        for node in nodes:
+            with self.mutex:
+                self.last_seen_table[node] += 1
+                if self.last_seen_table[node] >= NODE_TIMEOUT:
+                    self.node_timeout(node)
+
+
+    def node_timeout(self, node):
+        print(f"node {node} timed out")
+        self.color_table.pop(node)
+        self.last_seen_table.pop(node)          
 
 
     def update_table(self, node, msg):
         if(msg["type"]) == "update":
-            self.color_table[node] = msg["value"]
+            with self.mutex:
+                self.color_table[node] = msg["value"]
+                self.last_seen_table[node] = 0
 
 
     def send_color(self):
@@ -134,7 +149,6 @@ class ColorAssigner(Thread):
         }
 
         self.communication.send(msg)
-        time.sleep(1)
 
 
     def run(self):
