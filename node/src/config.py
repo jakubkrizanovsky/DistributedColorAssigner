@@ -1,6 +1,6 @@
-COLOR_DITRIBUTION = {
-    "red": 20,
+COLOR_DITRIBUTION = {   
     "green": 40,
+    "red": 20,
     "blue": 20,
     "yellow": 20
 }

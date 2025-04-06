@@ -56,10 +56,10 @@ class Api(Thread):
             return ""
         
         prev_link = f"<a href=\"http://localhost:{Api.my_api_port - 1}\">previous node</a>" \
-            if Api.my_api_port - 1 >= Api.min_api_port else "<span>first</span>"
+            if Api.my_api_port - 1 >= Api.min_api_port else "<span>first node</span>"
         
         next_link = f"<a href=\"http://localhost:{Api.my_api_port + 1}\">next node</a>" \
-            if Api.my_api_port + 1 <= Api.max_api_port else "<span>last</span>"
+            if Api.my_api_port + 1 <= Api.max_api_port else "<span>last node</span>"
 
         return f"<br><div>{prev_link} | {next_link}</div>"
 

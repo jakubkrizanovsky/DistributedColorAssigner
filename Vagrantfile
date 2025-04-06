@@ -17,6 +17,9 @@ unless Vagrant.has_plugin?("vagrant-docker-compose")
   exit
 end
 
+# Number of nodes to start:
+NODE_COUNT = 10
+
 # Names of Docker images built:
 NODE_IMAGE  = "dsa/distributed_color_assigner:0.1"
 
@@ -25,8 +28,6 @@ NODE = { :nameprefix => "node-",  # nodes get names: node-1, node-2, etc.
               :subnet => "192.168.1.",
               :ip_offset => 100,  # nodes get IP addresses: 192.168.1.101, .102, .103, etc
               :image => NODE_IMAGE}
-# Number of nodes to start:
-NODE_COUNT = 10
 
 # Common configuration
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
