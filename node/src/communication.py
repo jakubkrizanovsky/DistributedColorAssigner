@@ -30,11 +30,16 @@ class Communication:
                 continue
 
             msg = json.loads(data.decode("utf-8"))
-            print(f"Received: {msg} from {addr[0]}")
+
+            if VERBOSE:
+                print(f"Received: {msg} from {addr[0]}")
+                
             callback(addr[0], msg)
         
     def send(self, msg):
-        print(f"Sending: {msg}")
+        if VERBOSE:
+            print(f"Sending: {msg}")
+        
         self.send_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MCAST_TTL)
         self.send_socket.sendto(bytes(json.dumps(msg), "utf-8"), (MCAST_ADDR, MCAST_PORT))
 

@@ -21,7 +21,7 @@ class ColorAssigner(Thread):
 
 
     def set_color(self, color:str):
-        print(f"changing color from {self.color} to {color}")
+        print(f"Changing color from {self.color} to {color}", flush=True)
         self.color = color
         self.color_table[self.communication.own_addr + " (this node)"] = color
 
@@ -41,7 +41,6 @@ class ColorAssigner(Thread):
             target_distribution = self.get_target_distribution()
             actual_distribution = self.get_actual_distribution()
             is_target_distribution = self.is_target_distribution(target_distribution, actual_distribution)
-            print(f"Is target distribution: {is_target_distribution}")
             if not is_target_distribution:
                 self.adjust_color(target_distribution, actual_distribution)
 
@@ -62,8 +61,13 @@ class ColorAssigner(Thread):
             target_distribution[color] = x
             actual_sum += x
 
-        if actual_sum < node_count:
-            target_distribution[FILL_COLOR] += node_count - actual_sum
+        while actual_sum < node_count:
+            remainders: Dict[str, float] = {}
+            for color, dist in COLOR_DITRIBUTION.items():
+                remainders[color] = (dist / total * node_count) - target_distribution[color]
+            top_color = max(remainders, key=remainders.get)
+            target_distribution[top_color] += 1
+            actual_sum += 1
 
         return target_distribution
     
@@ -130,9 +134,9 @@ class ColorAssigner(Thread):
 
 
     def node_timeout(self, node):
-        print(f"node {node} timed out")
+        print(f"Node {node} timed out", flush=True)
         self.color_table.pop(node)
-        self.last_seen_table.pop(node)          
+        self.last_seen_table.pop(node)
 
 
     def update_table(self, node, msg):

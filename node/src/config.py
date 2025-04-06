@@ -5,7 +5,7 @@ COLOR_DITRIBUTION = {
     "yellow": 20
 }
 
-FILL_COLOR = "red"
+VERBOSE = False
 
 MCAST_PORT:int = 8888
 MCAST_ADDR:str = "224.1.1.1"

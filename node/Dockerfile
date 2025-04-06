@@ -7,6 +7,3 @@ RUN pip3 install flask
 COPY src /opt/distributed_color_assigner
 
 CMD /usr/bin/python3 /opt/distributed_color_assigner/main.py
-# CMD sleep infinity
-
-# EOF
